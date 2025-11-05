@@ -1,0 +1,11 @@
+#SeNãoDefinido CTTOML_PAR_CHAVE_VALOR
+#Defina CTTOML_PAR_CHAVE_VALOR
+#Inclua "Valor.ctec"
+
+#Defina MÁXIMO_COMPRIMENTO_CHAVE 128
+
+Pseudônimo Estrutura {
+   Caractere chave[MÁXIMO_COMPRIMENTO_CHAVE];
+   _Valor valor;
+} _Atributo;
+#FimSe

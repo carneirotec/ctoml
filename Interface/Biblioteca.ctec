@@ -1,0 +1,17 @@
+#SeNãoDefinido CTEC_CONVENCIONAL
+#Defina CTEC_CONVENCIONAL
+#Inclua <Tipo/Arquivo.ctec>
+#Inclua <Tipo/Logico.ctec>
+#Inclua <Tipo/Nulo.ctec>
+#FimSe
+
+#SeNãoDefinido CTTOML
+#Defina CTTOML
+
+#Inclua "Gerenciador/Analisador.ctec"
+#Inclua "Gerenciador/Atributo.ctec"
+#Inclua "Gerenciador/Tabela.ctec"
+#Inclua "Gerenciador/Toml.ctec"
+#Inclua "Gerenciador/Valor.ctec"
+
+#FimSe

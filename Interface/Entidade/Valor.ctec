@@ -1,0 +1,36 @@
+#SeNãoDefinido CTTOML_VALOR
+#Defina CTTOML_VALOR
+
+#Defina MÁXIMO_COMPRIMENTO_TEXTO 256
+#Defina MÁXIMO_VETOR_ELEMENTOS 32
+
+Pseudônimo Enumeração {
+   TIPO_TEXTO,
+   TIPO_INTEIRO,
+   TIPO_FLUTUANTE,
+   TIPO_BOOLEANO,
+   TIPO_ARRAY,
+   TIPO_TABELA_INLINE
+} TiposValor;
+
+Pseudônimo Estrutura ModeloValor _Valor;
+
+Estrutura ModeloValor {
+   TiposValor tipo;
+   União {
+       Caractere texto[MÁXIMO_COMPRIMENTO_TEXTO];
+       Inteiro inteiro;
+       Duplo real;
+       Lógico lógico;
+       Estrutura {
+           _Valor* elementos[MÁXIMO_VETOR_ELEMENTOS];
+           Inteiro quantidade;
+       } vetor;
+       Estrutura {
+           Caractere* chaves[MÁXIMO_VETOR_ELEMENTOS];
+           _Valor* valores[MÁXIMO_VETOR_ELEMENTOS];
+           Inteiro quantidade;
+       } tabela_inline;
+   } dados;
+};
+#FimSe

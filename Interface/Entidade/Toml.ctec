@@ -1,0 +1,17 @@
+#SeNãoDefinido CTTOML_ENTIDADE_TOML
+#Defina CTTOML_ENTIDADE_TOML
+
+#Inclua "Tabela.ctec"
+
+#Defina MÁXIMO_TABELAS 8 
+#Defina MÁXIMO_VALORES 32
+
+Pseudônimo Estrutura {
+   _Tabela tabela_raiz;
+   _Tabela pilha_tabelas[MÁXIMO_TABELAS];
+   Inteiro quantidade_tabelas_alocadas;
+   _Valor pilha_valores[MÁXIMO_VALORES];
+   Inteiro quantidade_valores_alocados;
+} _Toml;
+
+#FimSe

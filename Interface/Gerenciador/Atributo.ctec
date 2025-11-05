@@ -1,0 +1,13 @@
+#Inclua "../Entidade/Atributo.ctec"
+#SeNãoDefinido CTOML_PAR_CHAVE_VALOR
+#Defina CTOML_PAR_CHAVE_VALOR
+
+#Defina MÁXIMO_COMPRIMENTO_CHAVE 128
+
+Pseudônimo Estrutura {
+   _Atributo* (*inicialize) (_Atributo*, Caractere*, _Valor*);
+   Caractere* (*renderize) (_Atributo*, Caractere*, Inteiro);
+} GerenciadorAtributo;
+
+Externo GerenciadorAtributo Atributo;
+#FimSe

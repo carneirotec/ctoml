@@ -1,0 +1,34 @@
+#SeNãoDefinido CTTOML_GERENCIADOR_VALOR
+#Defina CTTOML_GERENCIADOR_VALOR
+
+Pseudônimo Estrutura {
+   _Valor* (*defina_texto) (_Valor*, Caractere*);
+   _Valor* (*defina_inteiro) (_Valor*, Inteiro);
+   _Valor* (*defina_real) (_Valor*, Duplo);
+   _Valor* (*defina_lógico) (_Valor*, Lógico);
+   _Valor* (*defina_vetor) (_Valor*);
+   _Valor* (*defina_tabela_inline) (_Valor*);
+   
+   Caractere* (*obtenha_texto) (_Valor*);
+   Inteiro (*obtenha_inteiro) (_Valor*);
+   Duplo (*obtenha_real) (_Valor*);
+   Lógico (*obtenha_booleano) (_Valor*);
+   Inteiro (*obtenha_tamanho_vetor) (_Valor*);
+   _Valor* (*obtenha_elemento_vetor) (_Valor*, Inteiro);
+   
+   Lógico (*confirme_texto) (_Valor*);
+   Lógico (*confirme_inteiro) (_Valor*);
+   Lógico (*confirme_real) (_Valor*);
+   Lógico (*confirme_booleano) (_Valor*);
+   Lógico (*confirme_vetor) (_Valor*);
+   Lógico (*confirme_tabela_inline) (_Valor*);
+
+   _Valor* (*adicione_elemento_vetor) (_Valor*, _Valor*);
+   _Valor* (*adicione_par_tabela) (_Valor*, Caractere*, _Valor*);
+
+   Caractere* (*renderize) (_Valor*, Caractere*, Inteiro, Lógico);
+} GerenciadorValor;
+
+Externo GerenciadorValor Valor;
+
+#FimSe

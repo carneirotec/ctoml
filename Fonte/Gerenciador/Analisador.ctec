@@ -1,0 +1,358 @@
+#Inclua "../../Interface/Biblioteca.ctec"
+
+#Defina TAMANHO_RESERVA 8192
+#Defina TAMANHO_LINHA 1024
+
+Lógico confirme_espaço(Caractere c) {
+   Retorne c == ' ' || c == '\t' || c == '\r';
+}
+
+Lógico confirme_nova_linha(Caractere c) {
+   Retorne c == '\n';
+}
+
+Vazio pule_espaços(ContextoAnalisador* ctx) {
+   Enquanto (ctx->posição < ctx->tamanho && confirme_espaço(ctx->conteúdo[ctx->posição])) {
+       ctx->posição++;
+   }
+}
+
+Vazio pule_linha(ContextoAnalisador* ctx) {
+   Enquanto (ctx->posição < ctx->tamanho && !confirme_nova_linha(ctx->conteúdo[ctx->posição])) {
+       ctx->posição++;
+   }
+   Se (ctx->posição < ctx->tamanho && confirme_nova_linha(ctx->conteúdo[ctx->posição])) {
+       ctx->posição++;
+       ctx->linha_atual++;
+   }
+}
+
+Lógico confirme_comentário(ContextoAnalisador* ctx) {
+   Retorne ctx->conteúdo[ctx->posição] == '#';
+}
+
+Inteiro leia_chave(ContextoAnalisador* ctx, Caractere* reserva, Inteiro tamanho) {
+   Inteiro índice = 0;
+   Lógico entre_aspas = Falso;
+   
+   Se (ctx->conteúdo[ctx->posição] == '"') {
+       entre_aspas = Verdadeiro;
+       ctx->posição++;
+   }
+   
+   Enquanto (ctx->posição < ctx->tamanho && índice < tamanho - 1) {
+       Caractere c = ctx->conteúdo[ctx->posição];
+       
+       Se (entre_aspas) {
+           Se (c == '"') {
+               ctx->posição++;
+               Interrompa;
+           }
+           reserva[índice++] = c;
+           ctx->posição++;
+       } Senão {
+           Se (c == '=' || c == ' ' || c == '\t' || c == '\n') {
+               Interrompa;
+           }
+           reserva[índice++] = c;
+           ctx->posição++;
+       }
+   }
+   
+   reserva[índice] = '\0';
+   Retorne índice;
+}
+
+Inteiro leia_nome_tabela(ContextoAnalisador* ctx, Caractere* reserva, Inteiro tamanho) {
+   Inteiro índice = 0;
+   
+   Enquanto (ctx->posição < ctx->tamanho && índice < tamanho - 1) {
+       Caractere c = ctx->conteúdo[ctx->posição];
+       
+       Se (c == ']') {
+           Interrompa;
+       }
+       
+       Se (c != ' ' && c != '\t') {
+           reserva[índice++] = c;
+       }
+       ctx->posição++;
+   }
+   
+   reserva[índice] = '\0';
+   Retorne índice;
+}
+
+_Valor* analise_texto(ContextoAnalisador* ctx, _Toml* toml) {
+   Caractere reserva[512];
+   Inteiro índice = 0;
+   
+   ctx->posição++;
+   
+   Enquanto (ctx->posição < ctx->tamanho && índice < 511) {
+       Caractere c = ctx->conteúdo[ctx->posição];
+       
+       Se (c == '"') {
+           ctx->posição++;
+           Interrompa;
+       }
+       
+       Se (c == '\\' && ctx->posição + 1 < ctx->tamanho) {
+           ctx->posição++;
+           Caractere próximo = ctx->conteúdo[ctx->posição];
+           
+           Troque (próximo) {
+               Caso 'n': reserva[índice++] = '\n'; Interrompa;
+               Caso 't': reserva[índice++] = '\t'; Interrompa;
+               Caso 'r': reserva[índice++] = '\r'; Interrompa;
+               Caso '\\': reserva[índice++] = '\\'; Interrompa;
+               Caso '"': reserva[índice++] = '"'; Interrompa;
+               Padrão: reserva[índice++] = próximo; Interrompa;
+           }
+           ctx->posição++;
+       } Senão {
+           reserva[índice++] = c;
+           ctx->posição++;
+       }
+   }
+   
+   reserva[índice] = '\0';
+   
+   _Valor* valor = Toml.obtenha_valor_novo(toml);
+   Se (valor != NULO) {
+       Valor.defina_texto(valor, reserva);
+   }
+   Retorne valor;
+}
+
+_Valor* analise_número(ContextoAnalisador* ctx, _Toml* toml) {
+   Caractere reserva[64];
+   Inteiro índice = 0;
+   Lógico confirme_real = Falso;
+   
+   Enquanto (ctx->posição < ctx->tamanho && índice < 63) {
+       Caractere c = ctx->conteúdo[ctx->posição];
+       
+       Se ((c >= '0' && c <= '9') || c == '-' || c == '+') {
+           reserva[índice++] = c;
+           ctx->posição++;
+       } Senão Se (c == '.' || c == 'e' || c == 'E') {
+           confirme_real = Verdadeiro;
+           reserva[índice++] = c;
+           ctx->posição++;
+       } Senão {
+           Interrompa;
+       }
+   }
+   
+   reserva[índice] = '\0';
+   
+   _Valor* valor = Toml.obtenha_valor_novo(toml);
+   Se (valor != NULO) {
+       Se (confirme_real) {
+           Valor.defina_real(valor, (Real)(reserva));
+       } Senão {
+           Valor.defina_inteiro(valor, (Inteiro)(reserva));
+       }
+   }
+   Retorne valor;
+}
+
+_Valor* analise_lógico(ContextoAnalisador* ctx, _Toml* toml) {
+   Lógico confirme_verdadeiro = Falso;
+   
+   Se (ctx->conteúdo[ctx->posição] == 't') {
+       confirme_verdadeiro = Verdadeiro;
+       ctx->posição += 4;
+   } Senão {
+       ctx->posição += 5;
+   }
+   
+   _Valor* valor = Toml.obtenha_valor_novo(toml);
+   Se (valor != NULO) {
+       Valor.defina_lógico(valor, confirme_verdadeiro);
+   }
+   Retorne valor;
+}
+
+_Valor* analise_vetor(ContextoAnalisador* ctx, _Toml* toml) {
+   _Valor* vetor = Toml.obtenha_valor_novo(toml);
+   Se (vetor == NULO) {
+       Retorne NULO;
+   }
+   
+   Valor.defina_vetor(vetor);
+   ctx->posição++;
+   
+   Enquanto (ctx->posição < ctx->tamanho) {
+       pule_espaços(ctx);
+       
+       Se (ctx->conteúdo[ctx->posição] == ']') {
+           ctx->posição++;
+           Interrompa;
+       }
+       
+       Se (ctx->conteúdo[ctx->posição] == ',') {
+           ctx->posição++;
+           Continue;
+       }
+       
+       _Valor* elemento = NULO;
+       
+       Se (ctx->conteúdo[ctx->posição] == '"') {
+           elemento = analise_texto(ctx, toml);
+       } Senão Se (ctx->conteúdo[ctx->posição] == '[') {
+           elemento = analise_vetor(ctx, toml);
+       } Senão Se (ctx->conteúdo[ctx->posição] == 't' || ctx->conteúdo[ctx->posição] == 'f') {
+           elemento = analise_lógico(ctx, toml);
+       } Senão Se ((ctx->conteúdo[ctx->posição] >= '0' && ctx->conteúdo[ctx->posição] <= '9') ||
+                  ctx->conteúdo[ctx->posição] == '-' || ctx->conteúdo[ctx->posição] == '+') {
+           elemento = analise_número(ctx, toml);
+       }
+       
+       Se (elemento != NULO) {
+           Valor.adicione_elemento_vetor(vetor, elemento);
+       }
+       
+       pule_espaços(ctx);
+   }
+   
+   Retorne vetor;
+}
+
+_Valor* analise_valor(ContextoAnalisador* ctx, _Toml* toml) {
+   pule_espaços(ctx);
+   
+   Se (ctx->posição >= ctx->tamanho) {
+       Retorne NULO;
+   }
+   
+   Caractere c = ctx->conteúdo[ctx->posição];
+   
+   Se (c == '"') {
+       Retorne analise_texto(ctx, toml);
+   } Senão Se (c == '[') {
+       Retorne analise_vetor(ctx, toml);
+   } Senão Se (c == 't' || c == 'f') {
+       Retorne analise_lógico(ctx, toml);
+   } Senão Se ((c >= '0' && c <= '9') || c == '-' || c == '+') {
+       Retorne analise_número(ctx, toml);
+   }
+   
+   Retorne NULO;
+}
+
+Vazio analise_par_chave_valor(ContextoAnalisador* ctx, _Toml* toml, _Tabela* tabela_atual) {
+   Caractere chave[128];
+   leia_chave(ctx, chave, 128);
+   
+   pule_espaços(ctx);
+   
+   Se (ctx->conteúdo[ctx->posição] == '=') {
+       ctx->posição++;
+   }
+   
+   _Valor* valor = analise_valor(ctx, toml);
+   
+   Se (valor != NULO) {
+       Tabela.adicione_par(tabela_atual, chave, valor);
+   }
+}
+
+_Toml* analisador_analise_texto(_Toml* toml, Caractere* conteúdo) {
+   ContextoAnalisador ctx;
+   ctx.conteúdo = conteúdo;
+   ctx.posição = 0;
+   ctx.linha_atual = 1;
+   ctx.tamanho = 0;
+   
+   Enquanto (conteúdo[ctx.tamanho] != '\0') {
+       ctx.tamanho++;
+   }
+   
+   Toml.inicialize(toml);
+   _Tabela* tabela_atual = Toml.obtenha_raiz(toml);
+   
+   Enquanto (ctx.posição < ctx.tamanho) {
+       pule_espaços(&ctx);
+       
+       Se (ctx.posição >= ctx.tamanho) {
+           Interrompa;
+       }
+       
+       Se (confirme_nova_linha(ctx.conteúdo[ctx.posição])) {
+           ctx.posição++;
+           ctx.linha_atual++;
+           Continue;
+       }
+       
+       Se (confirme_comentário(&ctx)) {
+           pule_linha(&ctx);
+           Continue;
+       }
+       
+       Se (ctx.conteúdo[ctx.posição] == '[') {
+           ctx.posição++;
+           Lógico confirme_vetor_tabelas = Falso;
+           
+           Se (ctx.conteúdo[ctx.posição] == '[') {
+               confirme_vetor_tabelas = Verdadeiro;
+               ctx.posição++;
+           }
+           
+           Caractere nome_tabela[128];
+           leia_nome_tabela(&ctx, nome_tabela, 128);
+           
+           Se (ctx.conteúdo[ctx.posição] == ']') {
+               ctx.posição++;
+               
+               Se (confirme_vetor_tabelas && ctx.conteúdo[ctx.posição] == ']') {
+                   ctx.posição++;
+               }
+           }
+           
+           _Tabela* nova_tabela = Toml.defina_tabela(toml, nome_tabela);
+           Se (nova_tabela != NULO) {
+               Se (confirme_vetor_tabelas) {
+                   Tabela.defina_vetor_de_tabelas(nova_tabela, Verdadeiro);
+               }
+               Tabela.adicione_subtabela(Toml.obtenha_raiz(toml), nova_tabela);
+               tabela_atual = nova_tabela;
+           }
+           
+           pule_linha(&ctx);
+           Continue;
+       }
+       
+       analise_par_chave_valor(&ctx, toml, tabela_atual);
+       pule_linha(&ctx);
+   }
+   
+   Retorne toml;
+}
+
+_Toml* analisador_analise_arquivo(_Toml* toml, Caractere* nome_arquivo) {
+   Arquivo* arquivo = abra_arquivo(nome_arquivo, "r");
+   
+   Se (arquivo == NULO) {
+       Retorne NULO;
+   }
+   
+   Caractere reserva[TAMANHO_RESERVA];
+   Inteiro posição = 0;
+   Caractere c;
+   
+   Enquanto ((c = leia_caractere(arquivo)) != -1 && posição < TAMANHO_RESERVA - 1) {
+       reserva[posição++] = c;
+   }
+   reserva[posição] = '\0';
+   
+   feche_arquivo(arquivo);
+   
+   Retorne analisador_analise_texto(toml, reserva);
+}
+
+GerenciadorAnalisador Analisador = {
+   .analise_arquivo = analisador_analise_arquivo,
+   .analise_texto = analisador_analise_texto
+};

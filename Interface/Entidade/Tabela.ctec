@@ -1,0 +1,20 @@
+#SeNãoDefinido CTOML_TABELA
+#Defina CTOML_TABELA
+#Inclua "Atributo.ctec"
+
+#Defina MÁXIMO_PARES_CHAVE_VALOR 64
+#Defina MÁXIMO_SUBTABELAS 32
+#Defina MÁXIMO_COMPRIMENTO_NOME 128
+
+Pseudônimo Estrutura ModeloTabela _Tabela;
+
+Estrutura ModeloTabela {
+   Caractere nome[MÁXIMO_COMPRIMENTO_NOME];
+   _Atributo lista_pares[MÁXIMO_PARES_CHAVE_VALOR];
+   Inteiro quantidade_pares;
+   _Tabela* lista_subtabelas[MÁXIMO_SUBTABELAS];
+   Inteiro quantidade_subtabelas;
+   Lógico confirme_vetor_de_tabelas;
+};
+
+#FimSe

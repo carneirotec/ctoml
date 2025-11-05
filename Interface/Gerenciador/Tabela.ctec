@@ -1,0 +1,25 @@
+#Inclua "../Entidade/Tabela.ctec"
+#SeNãoDefinido CTTOML_TABELA
+#Defina CTTOML_TABELA
+
+Pseudônimo Estrutura {
+   _Tabela* (*inicialize) (_Tabela*, Caractere*);
+   
+   _Tabela* (*adicione_par) (_Tabela*, Caractere*, _Valor*);
+   _Tabela* (*adicione_subtabela) (_Tabela*, _Tabela*);
+   
+   _Tabela* (*defina_vetor_de_tabelas) (_Tabela*, Lógico);
+   
+   _Valor* (*obtenha_valor) (_Tabela*, Caractere*);
+   _Tabela* (*obtenha_subtabela) (_Tabela*, Caractere*);
+   Lógico (*contém_chave) (_Tabela*, Caractere*);
+   Inteiro (*obtenha_quantidade_pares) (_Tabela*);
+   Inteiro (*obtenha_quantidade_subtabelas) (_Tabela*);
+   Caractere* (*obtenha_nome) (_Tabela*);
+   
+   Caractere* (*renderize) (_Tabela*, Caractere*, Inteiro, Lógico);
+} GerenciadorTabela;
+
+Externo GerenciadorTabela Tabela;
+
+#FimSe

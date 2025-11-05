@@ -1,0 +1,21 @@
+#Inclua "../Interface/Biblioteca.ctec"
+#Inclua "Gerenciador/Analisador.ctec"
+#Inclua "Gerenciador/Atributo.ctec"
+#Inclua "Gerenciador/Tabela.ctec"
+#Inclua "Gerenciador/Toml.ctec"
+#Inclua "Gerenciador/Valor.ctec"
+
+
+Inteiro Início() {
+   Caractere reserva[4096];
+   
+   _Toml toml_leitura;
+   Se (Analisador.analise_arquivo(&toml_leitura, "Manifesto.toml") != NULO) {
+       Toml.renderize(&toml_leitura, reserva, 4096);
+       exiba_formatado("Conteúdo lido:\n");
+       exiba_formatado(reserva);
+   } Senão {
+       exiba_formatado("Erro ao ler arquivo!\n");
+   }
+   Retorne 0;
+}

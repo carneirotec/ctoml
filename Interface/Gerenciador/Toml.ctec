@@ -1,0 +1,18 @@
+#SeNãoDefinido CTTOML_GERENCIADOR_TOML
+#Defina CTTOML_GERENCIADOR_TOML
+#Inclua "../Entidade/Toml.ctec"
+#Inclua "Tabela.ctec"
+
+Pseudônimo Estrutura {
+   _Toml* (*inicialize) (_Toml*);
+   _Tabela* (*obtenha_tabela_nova) (_Toml*);
+   _Valor* (*obtenha_valor_novo) (_Toml*);
+   _Tabela* (*defina_tabela) (_Toml*, Caractere*);
+   _Tabela* (*obtenha_raiz) (_Toml*);
+   Caractere* (*renderize) (_Toml*, Caractere*, Inteiro);
+   Inteiro (*defina_arquivo) (_Toml*, Caractere*);
+} GerenciadorToml;
+
+
+Externo GerenciadorToml Toml;
+#FimSe

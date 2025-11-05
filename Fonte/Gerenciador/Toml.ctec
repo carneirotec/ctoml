@@ -1,0 +1,68 @@
+#Inclua "../../Interface/Biblioteca.ctec"
+
+_Toml* toml_inicialize(_Toml* destino) {
+    destino->quantidade_tabelas_alocadas = 0;
+    destino->quantidade_valores_alocados = 0;
+    Tabela.inicialize(&destino->tabela_raiz, "");
+    Retorne destino;
+}
+
+_Tabela* toml_obtenha_tabela_nova(_Toml* toml) {
+    Se (toml->quantidade_tabelas_alocadas < MÁXIMO_TABELAS) {
+        Retorne &toml->pilha_tabelas[toml->quantidade_tabelas_alocadas++];
+    }
+    Retorne NULO;
+}
+
+_Valor* toml_obtenha_valor_novo(_Toml* toml) {
+    Se (toml->quantidade_valores_alocados < MÁXIMO_VALORES) {
+        Retorne &toml->pilha_valores[toml->quantidade_valores_alocados++];
+    }
+    Retorne NULO;
+}
+
+_Tabela* toml_defina_tabela(_Toml* toml, Caractere* nome) {
+    _Tabela* tabela = Toml.obtenha_tabela_nova(toml);
+    Se (tabela != NULO) {
+        Tabela.inicialize(tabela, nome);
+    }
+    Retorne tabela;
+}
+
+_Tabela* toml_obtenha_raiz(_Toml* toml) {
+    Se (toml == NULO) {
+        Retorne NULO;
+    }
+    Retorne &toml->tabela_raiz;
+}
+
+Caractere* toml_renderize(_Toml* toml, Caractere* destino, Inteiro tamanho_destino) {
+    Tabela.renderize(&toml->tabela_raiz, destino, tamanho_destino, Verdadeiro);
+    Retorne destino;
+}
+
+Inteiro toml_defina_arquivo(_Toml* toml, Caractere* nome_arquivo) {
+    Caractere reserva[8192];
+    Arquivo* arquivo = abra_arquivo(nome_arquivo, "w");
+
+    Se (arquivo == NULO) {
+        Retorne 1;
+    }
+
+    toml_renderize(toml, reserva, 8192);
+    escreva_linha(reserva, arquivo);
+    feche_arquivo(arquivo);
+
+    Retorne 0;
+}
+
+Externo GerenciadorToml Toml = {
+    .inicialize = toml_inicialize,
+    .obtenha_tabela_nova = toml_obtenha_tabela_nova,
+    .obtenha_valor_novo = toml_obtenha_valor_novo,
+    .defina_tabela = toml_defina_tabela,
+    .obtenha_raiz = toml_obtenha_raiz,
+    .renderize = toml_renderize,
+    .defina_arquivo = toml_defina_arquivo
+};
+

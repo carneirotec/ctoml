@@ -1,0 +1,193 @@
+#Inclua "../../Interface/Biblioteca.ctec"
+
+_Tabela* tabela_inicialize(_Tabela* destino, Caractere* nome) {
+   Inteiro índice = 0;
+   Enquanto (nome[índice] != '\0' && índice < MÁXIMO_COMPRIMENTO_NOME - 1) {
+       destino->nome[índice] = nome[índice];
+       índice++;
+   }
+   destino->nome[índice] = '\0';
+   
+   destino->quantidade_pares = 0;
+   destino->quantidade_subtabelas = 0;
+   destino->confirme_vetor_de_tabelas = Falso;
+   Retorne destino;
+}
+
+_Tabela* tabela_adicione_par(_Tabela* tabela, Caractere* chave, _Valor* valor) {
+   Se (tabela->quantidade_pares < MÁXIMO_PARES_CHAVE_VALOR) {
+       Atributo.inicialize(
+           &tabela->lista_pares[tabela->quantidade_pares],
+           chave,
+           valor
+       );
+       tabela->quantidade_pares++;
+   }
+   Retorne tabela;
+}
+
+_Tabela* tabela_adicione_subtabela(_Tabela* tabela, _Tabela* subtabela) {
+   Se (tabela->quantidade_subtabelas < MÁXIMO_SUBTABELAS) {
+       tabela->lista_subtabelas[tabela->quantidade_subtabelas] = subtabela;
+       tabela->quantidade_subtabelas++;
+   }
+   Retorne tabela;
+}
+
+_Tabela* tabela_defina_vetor_de_tabelas(_Tabela* tabela, Lógico valor) {
+   tabela->confirme_vetor_de_tabelas = valor;
+   Retorne tabela;
+}
+
+Lógico compare_chaves(Caractere* chave1, Caractere* chave2) {
+   Inteiro índice = 0;
+   Enquanto (chave1[índice] != '\0' && chave2[índice] != '\0') {
+       Se (chave1[índice] != chave2[índice]) {
+           Retorne Falso;
+       }
+       índice++;
+   }
+   Retorne chave1[índice] == chave2[índice];
+}
+
+_Valor* tabela_obtenha_valor(_Tabela* tabela, Caractere* chave) {
+   Para (Inteiro contador = 0; contador < tabela->quantidade_pares; contador++) {
+       Se (compare_chaves(tabela->lista_pares[contador].chave, chave)) {
+           Retorne &tabela->lista_pares[contador].valor;
+       }
+   }
+   Retorne NULO;
+}
+
+_Tabela* tabela_obtenha_subtabela(_Tabela* tabela, Caractere* nome_caminho) {
+   // Suporta caminhos como "Projeto" ou "Perfil.Depuração"
+   Caractere nome_procurado[MÁXIMO_COMPRIMENTO_NOME];
+   Caractere subcaminho[MÁXIMO_COMPRIMENTO_NOME];
+   Inteiro índice = 0;
+   Inteiro posição_nome = 0;
+   Lógico tem_ponto = Falso;
+   
+   // Extrai o primeiro segmento do caminho
+   Enquanto (nome_caminho[índice] != '\0' && nome_caminho[índice] != '.') {
+       nome_procurado[posição_nome++] = nome_caminho[índice++];
+   }
+   nome_procurado[posição_nome] = '\0';
+   
+   // Verifica se há mais segmentos no caminho
+   Se (nome_caminho[índice] == '.') {
+       tem_ponto = Verdadeiro;
+       índice++; // Pula o ponto
+       Inteiro posição_sub = 0;
+       Enquanto (nome_caminho[índice] != '\0') {
+           subcaminho[posição_sub++] = nome_caminho[índice++];
+       }
+       subcaminho[posição_sub] = '\0';
+   }
+   
+   // Procura a subtabela
+   Para (Inteiro contador = 0; contador < tabela->quantidade_subtabelas; contador++) {
+       Se (compare_chaves(tabela->lista_subtabelas[contador]->nome, nome_procurado)) {
+           // Se houver mais segmentos, busca recursivamente
+           Se (tem_ponto) {
+               Retorne tabela_obtenha_subtabela(tabela->lista_subtabelas[contador], subcaminho);
+           }
+           Retorne tabela->lista_subtabelas[contador];
+       }
+   }
+   
+   Retorne NULO;
+}
+
+Lógico tabela_contém_chave(_Tabela* tabela, Caractere* chave) {
+   Para (Inteiro contador = 0; contador < tabela->quantidade_pares; contador++) {
+       Se (compare_chaves(tabela->lista_pares[contador].chave, chave)) {
+           Retorne Verdadeiro;
+       }
+   }
+   Retorne Falso;
+}
+
+Inteiro tabela_obtenha_quantidade_pares(_Tabela* tabela) {
+   Retorne tabela->quantidade_pares;
+}
+
+Inteiro tabela_obtenha_quantidade_subtabelas(_Tabela* tabela) {
+   Retorne tabela->quantidade_subtabelas;
+}
+
+Caractere* tabela_obtenha_nome(_Tabela* tabela) {
+   Retorne tabela->nome;
+}
+
+Caractere* tabela_renderize(_Tabela* tabela, Caractere* destino, Inteiro tamanho_destino, Lógico confirme_raiz) {
+   Inteiro posição = 0;
+   
+   Se (!confirme_raiz && tabela->nome[0] != '\0') {
+       Se (tabela->confirme_vetor_de_tabelas) {
+           destino[posição++] = '[';
+           destino[posição++] = '[';
+       } Senão {
+           destino[posição++] = '[';
+       }
+       
+       Inteiro índice = 0;
+       Enquanto (tabela->nome[índice] != '\0' && posição < tamanho_destino - 1) {
+           destino[posição++] = tabela->nome[índice++];
+       }
+       
+       Se (tabela->confirme_vetor_de_tabelas) {
+           destino[posição++] = ']';
+           destino[posição++] = ']';
+       } Senão {
+           destino[posição++] = ']';
+       }
+       destino[posição++] = '\n';
+   }
+   
+   Para (Inteiro contador = 0; contador < tabela->quantidade_pares; contador++) {
+       Caractere par_renderizado[1024];
+       Atributo.renderize(&tabela->lista_pares[contador], par_renderizado, 1024);
+       
+       Inteiro índice = 0;
+       Enquanto (par_renderizado[índice] != '\0' && posição < tamanho_destino - 1) {
+           destino[posição++] = par_renderizado[índice++];
+       }
+       destino[posição++] = '\n';
+   }
+   
+   Para (Inteiro contador = 0; contador < tabela->quantidade_subtabelas; contador++) {
+       Se (contador > 0 || tabela->quantidade_pares > 0) {
+           destino[posição++] = '\n';
+       }
+       
+       Caractere subtabela_renderizada[4096];
+       Tabela.renderize(
+           tabela->lista_subtabelas[contador],
+           subtabela_renderizada,
+           4096,
+           Falso
+       );
+       
+       Inteiro índice = 0;
+       Enquanto (subtabela_renderizada[índice] != '\0' && posição < tamanho_destino - 1) {
+           destino[posição++] = subtabela_renderizada[índice++];
+       }
+   }
+   
+   destino[posição] = '\0';
+   Retorne destino;
+}
+
+Externo GerenciadorTabela Tabela = {
+   .inicialize = tabela_inicialize,
+   .adicione_par = tabela_adicione_par,
+   .adicione_subtabela = tabela_adicione_subtabela,
+   .defina_vetor_de_tabelas = tabela_defina_vetor_de_tabelas,
+   .obtenha_valor = tabela_obtenha_valor,
+   .obtenha_subtabela = tabela_obtenha_subtabela,
+   .contém_chave = tabela_contém_chave,
+   .obtenha_quantidade_pares = tabela_obtenha_quantidade_pares,
+   .obtenha_quantidade_subtabelas = tabela_obtenha_quantidade_subtabelas,
+   .obtenha_nome = tabela_obtenha_nome,
+   .renderize = tabela_renderize
+};

@@ -1,0 +1,42 @@
+#Inclua "../../Interface/Biblioteca.ctec"
+
+_Atributo* par_chave_valor_inicialize(_Atributo* destino, Caractere* chave, _Valor* valor) {
+   Inteiro índice = 0;
+   Enquanto (chave[índice] != '\0' && índice < MÁXIMO_COMPRIMENTO_CHAVE - 1) {
+       destino->chave[índice] = chave[índice];
+       índice++;
+   }
+   destino->chave[índice] = '\0';
+   
+   destino->valor = *valor;
+   Retorne destino;
+}
+
+Caractere* par_chave_valor_renderize(_Atributo* par, Caractere* destino, Inteiro tamanho_destino) {
+   Inteiro posição = 0;
+   
+   Inteiro índice = 0;
+   Enquanto (par->chave[índice] != '\0' && posição < tamanho_destino - 1) {
+       destino[posição++] = par->chave[índice++];
+   }
+   
+   destino[posição++] = ' ';
+   destino[posição++] = '=';
+   destino[posição++] = ' ';
+   
+   Caractere valor_renderizado[512];
+   Valor.renderize(&par->valor, valor_renderizado, 512, Verdadeiro);
+   
+   índice = 0;
+   Enquanto (valor_renderizado[índice] != '\0' && posição < tamanho_destino - 1) {
+       destino[posição++] = valor_renderizado[índice++];
+   }
+   
+   destino[posição] = '\0';
+   Retorne destino;
+}
+
+GerenciadorAtributo Atributo = {
+   .inicialize = par_chave_valor_inicialize,
+   .renderize = par_chave_valor_renderize
+};

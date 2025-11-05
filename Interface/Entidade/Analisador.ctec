@@ -1,0 +1,19 @@
+#SeNãoDefinido CTOML_ANALISADOR
+#Defina CTOML_ANALISADOR
+#Inclua "Toml.ctec"
+
+Pseudônimo Estrutura {
+   Caractere* conteúdo;
+   Inteiro posição;
+   Inteiro tamanho;
+   Inteiro linha_atual;
+} ContextoAnalisador;
+
+Pseudônimo Estrutura {
+   _Toml* (*analise_arquivo) (_Toml*, Caractere*);
+   _Toml* (*analise_texto) (_Toml*, Caractere*);
+} GerenciadorAnalisador;
+
+Externo GerenciadorAnalisador Analisador;
+
+#FimSe

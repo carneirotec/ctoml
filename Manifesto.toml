@@ -1,0 +1,41 @@
+[Projeto]
+Nome = "cttoml"
+Descrição = "CTEC - Gerenciador de Toml"
+Versão = "1.0.0"
+Tipo = "Executável"
+Saída = "cgp"
+Licença = "CTECL"
+Página = "CTECL"
+
+[Autor]
+Nome = "Anildo J. Carneiro"
+CorreioEletrônico = "anildo.10@hotmail.com"
+
+[Compilador]
+Nome = "ctec"
+VersãoMínima = "1.0"
+Sinalizadores = []
+
+[Perfil.Depuração]
+Sinalizadores = ["-g", "-O0"]
+Saída = "Construcao/Depuracao/cttoml"
+
+[Perfil.Lançamento]
+Sinalizadores = ["-O3", "-s"]
+Saída = "Construcao/Lancamento/cttoml"
+
+[Perfil.Biblioteca]
+Sinalizadores = []
+Saída = "Construcao/Biblioteca/cttoml"
+
+[Segurança]
+Habilitada = Verdadeiro
+Políticas = ["VerificarAssinaturas", "BloquearExecuçõesExternas"]
+
+[[Dependência.desenvolvimento]]
+
+[Procedimento]
+Limpar = "rm -rf Construcao"
+Compilar = "ctec --perfil=Depuração"
+Publicar = "ctec --perfil=Lançamento && ctec enviar --destino=RepositorioCentral"
+Testar = "ctec ./Teste/Teste.ctec && ./Teste/Teste"

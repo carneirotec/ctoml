@@ -1,0 +1,286 @@
+#Inclua "../../Interface/Biblioteca.ctec"
+
+_Valor* valor_defina_texto(_Valor* destino, Caractere* texto) {
+   destino->tipo = TIPO_TEXTO;
+   Inteiro índice = 0;
+   Enquanto (texto[índice] != '\0' && índice < MÁXIMO_COMPRIMENTO_TEXTO - 1) {
+       destino->dados.texto[índice] = texto[índice];
+       índice++;
+   }
+   destino->dados.texto[índice] = '\0';
+   Retorne destino;
+}
+
+_Valor* valor_defina_inteiro(_Valor* destino, Inteiro número) {
+   destino->tipo = TIPO_INTEIRO;
+   destino->dados.inteiro = número;
+   Retorne destino;
+}
+
+_Valor* valor_defina_real(_Valor* destino, Duplo número) {
+   destino->tipo = TIPO_FLUTUANTE;
+   destino->dados.real = número;
+   Retorne destino;
+}
+
+_Valor* valor_defina_lógico(_Valor* destino, Lógico valor) {
+   destino->tipo = TIPO_BOOLEANO;
+   destino->dados.lógico = valor;
+   Retorne destino;
+}
+
+_Valor* valor_defina_vetor(_Valor* destino) {
+   destino->tipo = TIPO_ARRAY;
+   destino->dados.vetor.quantidade = 0;
+   Retorne destino;
+}
+
+_Valor* valor_defina_tabela_inline(_Valor* destino) {
+   destino->tipo = TIPO_TABELA_INLINE;
+   destino->dados.tabela_inline.quantidade = 0;
+   Retorne destino;
+}
+
+_Valor* valor_adicione_elemento_vetor(_Valor* vetor, _Valor* elemento) {
+   Se (vetor->tipo == TIPO_ARRAY && vetor->dados.vetor.quantidade < MÁXIMO_VETOR_ELEMENTOS) {
+       vetor->dados.vetor.elementos[vetor->dados.vetor.quantidade++] = elemento;
+   }
+   Retorne vetor;
+}
+
+_Valor* valor_adicione_par_tabela(_Valor* tabela, Caractere* chave, _Valor* valor) {
+   Se (tabela->tipo == TIPO_TABELA_INLINE && 
+       tabela->dados.tabela_inline.quantidade < MÁXIMO_VETOR_ELEMENTOS) {
+       Inteiro índice = tabela->dados.tabela_inline.quantidade;
+       tabela->dados.tabela_inline.chaves[índice] = chave;
+       tabela->dados.tabela_inline.valores[índice] = valor;
+       tabela->dados.tabela_inline.quantidade++;
+   }
+   Retorne tabela;
+}
+
+Lógico valor_confirme_texto(_Valor* valor) {
+   Retorne valor != NULO && valor->tipo == TIPO_TEXTO;
+}
+
+Lógico valor_confirme_inteiro(_Valor* valor) {
+   Retorne valor != NULO && valor->tipo == TIPO_INTEIRO;
+}
+
+Lógico valor_confirme_real(_Valor* valor) {
+   Retorne valor != NULO && valor->tipo == TIPO_FLUTUANTE;
+}
+
+Lógico valor_confirme_booleano(_Valor* valor) {
+   Retorne valor != NULO && valor->tipo == TIPO_BOOLEANO;
+}
+
+Lógico valor_confirme_vetor(_Valor* valor) {
+   Retorne valor != NULO && valor->tipo == TIPO_ARRAY;
+}
+
+Lógico valor_confirme_tabela_inline(_Valor* valor) {
+   Retorne valor != NULO && valor->tipo == TIPO_TABELA_INLINE;
+}
+
+Caractere* valor_obtenha_texto(_Valor* valor) {
+   Se (valor != NULO && valor->tipo == TIPO_TEXTO) {
+       Retorne valor->dados.texto;
+   }
+   Retorne NULO;
+}
+
+Inteiro valor_obtenha_inteiro(_Valor* valor) {
+   Se (valor != NULO && valor->tipo == TIPO_INTEIRO) {
+       Retorne valor->dados.inteiro;
+   }
+   Retorne 0;
+}
+
+Duplo valor_obtenha_real(_Valor* valor) {
+   Se (valor != NULO && valor->tipo == TIPO_FLUTUANTE) {
+       Retorne valor->dados.real;
+   }
+   Retorne 0.0;
+}
+
+Lógico valor_obtenha_booleano(_Valor* valor) {
+   Se (valor != NULO && valor->tipo == TIPO_BOOLEANO) {
+       Retorne valor->dados.lógico;
+   }
+   Retorne Falso;
+}
+
+Inteiro valor_obtenha_tamanho_vetor(_Valor* valor) {
+   Se (valor != NULO && valor->tipo == TIPO_ARRAY) {
+       Retorne valor->dados.vetor.quantidade;
+   }
+   Retorne 0;
+}
+
+_Valor* valor_obtenha_elemento_vetor(_Valor* valor, Inteiro índice) {
+   Se (valor != NULO && valor->tipo == TIPO_ARRAY) {
+       Se (índice >= 0 && índice < valor->dados.vetor.quantidade) {
+           Retorne valor->dados.vetor.elementos[índice];
+       }
+   }
+   Retorne NULO;
+}
+
+Vazio renderize_número_inteiro(Inteiro número, Caractere* destino, Inteiro* posição) {
+   Se (número < 0) {
+       destino[(*posição)++] = '-';
+       número = -número;
+   }
+   
+   Caractere temporário[32];
+   Inteiro índice_temp = 0;
+   
+   Se (número == 0) {
+       temporário[índice_temp++] = '0';
+   } Senão {
+       Enquanto (número > 0) {
+           temporário[índice_temp++] = '0' + (número % 10);
+           número /= 10;
+       }
+   }
+   
+   Enquanto (índice_temp > 0) {
+       destino[(*posição)++] = temporário[--índice_temp];
+   }
+}
+
+Caractere* valor_renderize(_Valor* valor, Caractere* destino, Inteiro tamanho_destino, Lógico usar_aspas) {
+   Inteiro posição = 0;
+   
+   Se (valor->tipo == TIPO_TEXTO) {
+       Se (usar_aspas) {
+           destino[posição++] = '"';
+       }
+       Inteiro índice = 0;
+       Enquanto (valor->dados.texto[índice] != '\0' && posição < tamanho_destino - 2) {
+           destino[posição++] = valor->dados.texto[índice++];
+       }
+       Se (usar_aspas) {
+           destino[posição++] = '"';
+       }
+   } Senão Se (valor->tipo == TIPO_INTEIRO) {
+       renderize_número_inteiro(valor->dados.inteiro, destino, &posição);
+   } Senão Se (valor->tipo == TIPO_FLUTUANTE) {
+       Duplo número = valor->dados.real;
+       Lógico negativo = Falso;
+       Se (número < 0) {
+           negativo = Verdadeiro;
+           número = -número;
+       }
+       
+       Se (negativo) {
+           destino[posição++] = '-';
+       }
+       
+       Inteiro parte_inteira = 0;
+       Enquanto (número >= 1.0) {
+           número = número - 1.0;
+           parte_inteira++;
+       }
+       
+       renderize_número_inteiro(parte_inteira, destino, &posição);
+       destino[posição++] = '.';
+       
+       Duplo parte_decimal = número * 100.0;
+       Inteiro decimais = 0;
+       Enquanto (parte_decimal >= 1.0) {
+           parte_decimal = parte_decimal - 1.0;
+           decimais++;
+       }
+       
+       renderize_número_inteiro(decimais, destino, &posição);
+   } Senão Se (valor->tipo == TIPO_BOOLEANO) {
+       Se (valor->dados.lógico) {
+           Caractere* verdadeiro = "true";
+           Inteiro i = 0;
+           Enquanto (verdadeiro[i] != '\0') {
+               destino[posição++] = verdadeiro[i++];
+           }
+       } Senão {
+           Caractere* falso = "false";
+           Inteiro i = 0;
+           Enquanto (falso[i] != '\0') {
+               destino[posição++] = falso[i++];
+           }
+       }
+   } Senão Se (valor->tipo == TIPO_ARRAY) {
+       destino[posição++] = '[';
+       Para (Inteiro i = 0; i < valor->dados.vetor.quantidade; i++) {
+           Caractere temp[256];
+           Valor.renderize(valor->dados.vetor.elementos[i], temp, 256, Verdadeiro);
+           Inteiro j = 0;
+           Enquanto (temp[j] != '\0' && posição < tamanho_destino - 1) {
+               destino[posição++] = temp[j++];
+           }
+           Se (i < valor->dados.vetor.quantidade - 1) {
+               destino[posição++] = ',';
+               destino[posição++] = ' ';
+           }
+       }
+       destino[posição++] = ']';
+   } Senão Se (valor->tipo == TIPO_TABELA_INLINE) {
+       destino[posição++] = '{';
+       destino[posição++] = ' ';
+       Para (Inteiro i = 0; i < valor->dados.tabela_inline.quantidade; i++) {
+           Inteiro j = 0;
+           Enquanto (valor->dados.tabela_inline.chaves[i][j] != '\0' && 
+                    posição < tamanho_destino - 1) {
+               destino[posição++] = valor->dados.tabela_inline.chaves[i][j++];
+           }
+           destino[posição++] = ' ';
+           destino[posição++] = '=';
+           destino[posição++] = ' ';
+           
+           Caractere temp[256];
+           Valor.renderize(valor->dados.tabela_inline.valores[i], temp, 256, Verdadeiro);
+           j = 0;
+           Enquanto (temp[j] != '\0' && posição < tamanho_destino - 1) {
+               destino[posição++] = temp[j++];
+           }
+           
+           Se (i < valor->dados.tabela_inline.quantidade - 1) {
+               destino[posição++] = ',';
+               destino[posição++] = ' ';
+           }
+       }
+       destino[posição++] = ' ';
+       destino[posição++] = '}';
+   }
+   
+   destino[posição] = '\0';
+   Retorne destino;
+}
+
+Externo GerenciadorValor Valor = {
+   .defina_texto = valor_defina_texto,
+   .defina_inteiro = valor_defina_inteiro,
+   .defina_real = valor_defina_real,
+   .defina_lógico = valor_defina_lógico,
+   .defina_vetor = valor_defina_vetor,
+   .defina_tabela_inline = valor_defina_tabela_inline,
+   
+   .obtenha_texto = valor_obtenha_texto,
+   .obtenha_inteiro = valor_obtenha_inteiro,
+   .obtenha_real = valor_obtenha_real,
+   .obtenha_booleano = valor_obtenha_booleano,
+   .obtenha_tamanho_vetor = valor_obtenha_tamanho_vetor,
+   .obtenha_elemento_vetor = valor_obtenha_elemento_vetor,
+   
+   .confirme_texto = valor_confirme_texto,
+   .confirme_inteiro = valor_confirme_inteiro,
+   .confirme_real = valor_confirme_real,
+   .confirme_booleano = valor_confirme_booleano,
+   .confirme_vetor = valor_confirme_vetor,
+   .confirme_tabela_inline = valor_confirme_tabela_inline,
+   
+   .adicione_elemento_vetor = valor_adicione_elemento_vetor,
+   .adicione_par_tabela = valor_adicione_par_tabela,
+   
+   .renderize = valor_renderize,
+};

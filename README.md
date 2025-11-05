@@ -1,2 +1,2 @@
 # ctoml
-Interpretador da linguagem TOML
+Interpretador da linguagem Toml
